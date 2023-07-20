@@ -1,23 +1,11 @@
 import { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Todo = () => {
-  const [todos, setTodos] = useState([
-    {
-      id: 1,
-      text: "Uxlash",
-      isCompleted: false,
-    },
-    {
-      id: 2,
-      text: "Futbol ko'rish",
-      isCompleted: false,
-    },
-    {
-      id: 3,
-      text: "Dars qilish",
-      isCompleted: false,
-    },
-  ]);
+  const [todos, setTodos] = useState(
+    JSON.parse(localStorage.getItem("todos")) || []
+  );
 
   const [value, setValue] = useState("");
 
@@ -29,13 +17,14 @@ const Todo = () => {
     setTodos([
       ...todos,
       {
-        id: todos[todos.length - 1].id + 1,
+        id: todos[todos.length - 1]?.id + 1 || 1,
         text: value,
         isCompleted: false,
       },
     ]);
 
     setValue("");
+    toast.success("Todo Added!");
   };
 
   // Edit Function
@@ -46,6 +35,7 @@ const Todo = () => {
 
     findId.text = newText;
     setTodos([...todos]);
+    toast.warning("Todo Edited!");
   };
 
   // IsCompleted function
@@ -56,11 +46,12 @@ const Todo = () => {
 
     findChange.isCompleted = !findChange.isCompleted;
     setTodos([...todos]);
+    toast.info("Todo Change!");
   };
 
-  // LocalStorage function
+  localStorage.setItem("todos", JSON.stringify(todos));
 
-  // localStorage.setItem("todos", JSON.stringify("todos"));
+  // Return function
 
   return (
     <div className="pt-10">
@@ -83,52 +74,71 @@ const Todo = () => {
         </button>
       </form>
       <ul className="flex flex-col items-center">
-        {todos.map((item) => {
-          return (
-            <li
-              key={item.id}
-              className="flex justify-between items-center w-[500px] py-4 px-3 border text-white bg-[#423A6F] border-b-2 border-[#2d284c]"
-            >
-              <div className="flex items-center">
-                <strong className="text-xl me-4">{item.id}.</strong>
-                <input
-                  onChange={() => handlerChange(item.id)}
-                  defaultChecked={item.isCompleted}
-                  className="me-2"
-                  type="checkbox"
-                />
-                <h3
-                  className={
-                    item.isCompleted ? "line-through text-xl" : "text-xl"
-                  }
-                >
-                  {item.text}
-                </h3>
-              </div>
-              <div className="">
-                <button
-                  onClick={() => handlerEditBtn(item.id, item.text)}
-                  className="bg-yellow-400 p-1 px-5 me-3"
-                  type="submit"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => {
-                    const findItem = todos.filter(
-                      (list) => list.id !== item.id
-                    );
-                    setTodos(findItem);
-                  }}
-                  className="bg-red-700 p-1 px-5"
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          );
-        })}
+        {todos.length ? (
+          todos.map((item) => {
+            return (
+              <li
+                key={item.id}
+                className="flex justify-between items-center w-[500px] py-4 px-3 border text-white bg-[#423A6F] border-b-2 border-[#2d284c]"
+              >
+                <div className="flex items-center">
+                  <strong className="text-xl me-4">{item.id}.</strong>
+                  <input
+                    onChange={() => handlerChange(item.id)}
+                    defaultChecked={item.isCompleted}
+                    className="me-2"
+                    type="checkbox"
+                  />
+                  <h3
+                    className={
+                      item.isCompleted ? "line-through text-xl" : "text-xl"
+                    }
+                  >
+                    {item.text}
+                  </h3>
+                </div>
+                <div className="">
+                  <button
+                    onClick={() => handlerEditBtn(item.id, item.text)}
+                    className="bg-yellow-400 p-1 px-5 me-3"
+                    type="submit"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => {
+                      const findItem = todos.filter(
+                        (list) => list.id !== item.id
+                      );
+                      setTodos(findItem);
+                      toast.error("Todo Deleted!");
+                    }}
+                    className="bg-red-700 p-1 px-5"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            );
+          })
+        ) : (
+          <h2 className="py-2 px-4 text-3xl font-bold text-white bg-black rounded uppercase">
+            No Todos List
+          </h2>
+        )}
       </ul>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 };
